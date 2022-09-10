@@ -54,7 +54,7 @@ const handleFormSubmit = () => {
     class="login-container flex flex-column justify-content-center bg-orange-1500"
   >
     <h2>Please login!</h2>
-    <form @submit="handleFormSubmit" class="flex flex-column">
+    <form @submit.prevent="handleFormSubmit" class="flex flex-column">
       <div class="col-12">
         <div class="p-inputgroup">
           <span class="p-inputgroup-addon">

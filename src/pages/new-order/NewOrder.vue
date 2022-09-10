@@ -17,7 +17,7 @@ const convertToKeyValue = (arr = []) => {
 
 const router = useRouter();
 
-const formData = reactive(initialOrder);
+const formData = reactive({ ...initialOrder });
 const isValid = reactive({
   consigneeName: true,
   consigneeAddress: true,
@@ -146,7 +146,7 @@ const handleCloseSuccess = () => {
   <div class="neworder-container flex flex-column 1bg-orange-500">
     <h2 class="text-3xl text-blue-500">New Order Page</h2>
     <Breadcrumb class="mb-6" :home="dashboard" :model="menuItems" />
-    <form @submit="handleFormSubmit" class="grid">
+    <form @submit.prevent="handleFormSubmit" class="grid">
       <div class="field col-12 lg:col-6">
         <label id="ConsigneeName">Consignee Name</label>
         <InputText
