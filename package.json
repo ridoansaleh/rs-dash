@@ -1,0 +1,23 @@
+{
+  "name": "rs-dash",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "axios": "^0.27.2",
+    "primeflex": "^3.2.1",
+    "primeicons": "^5.0.0",
+    "primevue": "^3.16.2",
+    "vue": "^3.2.37",
+    "vue-router": "^4.1.5"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^3.1.0",
+    "vite": "^3.1.0"
+  }
+}
