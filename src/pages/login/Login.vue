@@ -21,7 +21,7 @@ const showPassword = ref(false);
 const isLoading = ref(false);
 const isServerError = ref(false)
 
-const onFieldBlur = () => {
+const onFieldBlur = (field) => {
   isValid[field] = formData[field] !== ""
 }
 
