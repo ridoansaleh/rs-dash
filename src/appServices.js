@@ -1,13 +1,10 @@
 import axios from "axios";
 
 const instance = axios.create({
-  baseURL: "https://fe-screening.onrender.com",
-  headers: {
-    "Content-Type": "application/json",
-  },
+  baseURL: "https://fe-screening.onrender.com"
 });
 
-const appSevices = {
+const appServices = {
   login: ({ username, password }) => {
     return instance.post("/login", {
       username,
@@ -24,7 +21,7 @@ const appSevices = {
   createrOrder: (data, session) => {
     return instance.post(
       "/orders",
-      { ...data },
+      data,
       {
         headers: {
           Authorization: session,
@@ -34,4 +31,4 @@ const appSevices = {
   },
 };
 
-export default appSevices;
+export default appServices;

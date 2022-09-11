@@ -21,7 +21,7 @@ const showPassword = ref(false);
 const isLoading = ref(false);
 const isServerError = ref(false)
 
-const onFieldBlur = (field) => {
+const onFieldChange = (field) => {
   isValid[field] = formData[field] !== ""
 }
 
@@ -63,7 +63,7 @@ const handleFormSubmit = () => {
           <InputText
             placeholder="Username"
             v-model.trim="formData.username"
-            @blur="() => onFieldBlur('username')"
+            @input="() => onFieldChange('username')"
             aria-describedby="username-help"
             :class="{ 'p-invalid': !isValid.username }"
           />
@@ -81,7 +81,7 @@ const handleFormSubmit = () => {
             :type="showPassword ? 'text' : 'password'"
             placeholder="Password"
             v-model.trim="formData.password"
-            @blur="() => onFieldBlur('password')"
+            @input="() => onFieldChange('password')"
             aria-describedby="password-help"
             :class="{ 'p-invalid': !isValid.password }"
           />

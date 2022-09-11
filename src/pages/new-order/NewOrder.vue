@@ -3,17 +3,20 @@ import { ref, reactive, computed, watch } from "vue";
 import { useRouter } from "vue-router";
 import InputText from "primevue/inputtext";
 import Dropdown from "primevue/dropdown";
-import InputNumber from "primevue/inputnumber";
 import Button from "primevue/button";
 import Dialog from "primevue/dialog";
 import Breadcrumb from "primevue/breadcrumb";
 import appServices from "../../appServices";
 import { PATH, AUTH_SESSION } from "../../constant";
-import { initialOrder, countryList, provinceList, cityList, paymentTypeList } from "./data";
+import {
+  initialOrder,
+  countryList,
+  provinceList,
+  cityList,
+  paymentTypeList,
+} from "./data";
 
-const convertToKeyValue = (arr = []) => {
-  return arr.map((d) => ({ name: d, code: d }));
-};
+const toKeyValue = (arr = []) => arr.map((d) => ({ name: d, code: d }));
 
 const router = useRouter();
 
@@ -32,8 +35,8 @@ const isValid = reactive({
   width: true,
   paymentType: true,
 });
-const isSubmitting = ref(false);
 const isLoading = ref(false);
+const isSubmitting = ref(false);
 const isServerError = ref(false);
 const isSuccess = ref(false);
 const countries = ref(countryList);
@@ -44,7 +47,7 @@ const provinces = computed(() => {
     list = provinceList.SG;
   }
   list = provinceList[formData.consigneeCountry];
-  return convertToKeyValue(list);
+  return toKeyValue(list);
 });
 
 const cities = computed(() => {
@@ -53,9 +56,9 @@ const cities = computed(() => {
     list = cityList.Singapore;
   }
   list = cityList[formData.consigneeProvince];
-  return convertToKeyValue(list);
+  return toKeyValue(list);
 });
-const paymentTypes = ref(convertToKeyValue(paymentTypeList));
+const paymentTypes = ref(toKeyValue(paymentTypeList));
 
 const dashboard = {
   icon: "pi pi-table",
@@ -67,46 +70,21 @@ const menuItems = [
   { label: "New Order", to: PATH.NEW_ORDER },
 ];
 
-const onFieldBlur = (field) => {
-  isValid[field] = ![null, ""].includes(formData[field]);
+const validateValue = (value) => {
+  if (typeof value === "number") return value > 0;
+  return ![null, ""].includes(value);
 };
 
-watch(
-  () => formData.consigneeCountry,
-  (newCountry) => {
-    if (newCountry.trim() !== "") {
-      formData.consigneeProvince = "";
-      formData.consigneeCity = "";
-    }
-  }
-);
-
-watch(
-  [
-    () => formData.consigneeCountry,
-    () => formData.consigneeProvince,
-    () => formData.consigneeCity,
-  ],
-  ([newCountry, newProvince, newCity]) => {
-    if (isSubmitting.value) return;
-    isValid.consigneeCountry = newCountry.trim() !== "";
-    isValid.consigneeProvince = newProvince.trim() !== "";
-    isValid.consigneeCity = newCity.trim() !== "";
-  }
-);
-
-watch([() => formData.paymentType], ([newPaymentType]) => {
-  if (isSubmitting.value) return;
-  isValid.paymentType = newPaymentType.trim() !== "";
-});
+const onFieldChange = (field) => {
+  console.log("Changed : ", formData[field]);
+  isValid[field] = validateValue(formData[field]);
+};
 
 const handleFormSubmit = () => {
-  let isFieldValid = {};
   for (const field in formData) {
-    isValid[field] = ![null, ""].includes(formData[field]);
-    isFieldValid[field] = ![null, ""].includes(formData[field]);
+    isValid[field] = validateValue(formData[field]);
   }
-  const validStatuses = Object.values(isFieldValid);
+  const validStatuses = Object.values(isValid);
   if (validStatuses.some((valid) => valid === false)) return;
   isLoading.value = true;
   isSubmitting.value = true;
@@ -146,14 +124,13 @@ const handleCloseSuccess = () => {
   <div class="neworder-container flex flex-column 1bg-orange-500">
     <h2 class="text-3xl text-blue-500">New Order Page</h2>
     <Breadcrumb class="mb-6" :home="dashboard" :model="menuItems" />
-    <form @submit.prevent="handleFormSubmit" class="grid">
+    <form @submit.prevent="handleFormSubmit" class="grid" novalidate>
       <div class="field col-12 lg:col-6">
-        <label id="ConsigneeName">Consignee Name</label>
+        <label for="ConsigneeName">Consignee Name</label>
         <InputText
           id="ConsigneeName"
-          placeholder="Consignee Name"
-          v-model="formData.consigneeName"
-          @blur="() => onFieldBlur('consigneeName')"
+          v-model.trim="formData.consigneeName"
+          @input="() => onFieldChange('consigneeName')"
           aria-describedby="consignee-name-help"
           :class="{ 'w-full': true, 'p-invalid': !isValid.consigneeName }"
         />
@@ -165,12 +142,11 @@ const handleCloseSuccess = () => {
         >
       </div>
       <div class="field col-12 lg:col-6">
-        <label id="ConsigneeAddress">Consignee Address</label>
+        <label for="ConsigneeAddress">Consignee Address</label>
         <InputText
           id="ConsigneeAddress"
-          placeholder="Consignee Address"
-          v-model="formData.consigneeAddress"
-          @blur="() => onFieldBlur('consigneeAddress')"
+          v-model.trim="formData.consigneeAddress"
+          @input="() => onFieldChange('consigneeAddress')"
           aria-describedby="consignee-address-help"
           :class="{ 'w-full': true, 'p-invalid': !isValid.consigneeAddress }"
         />
@@ -182,14 +158,15 @@ const handleCloseSuccess = () => {
         >
       </div>
       <div class="field col-12 lg:col-6">
-        <label id="ConsigneeCountry">Consignee Country</label>
+        <label for="ConsigneeCountry">Consignee Country</label>
         <Dropdown
           id="ConsigneeCountry"
           v-model="formData.consigneeCountry"
           :options="countries"
+          @change="() => onFieldChange('consigneeCountry')"
           optionLabel="name"
           optionValue="code"
-          placeholder="Select a Consignee Country"
+          placeholder="Select"
           aria-describedby="consignee-country-help"
           :class="{ 'w-full': true, 'p-invalid': !isValid.consigneeCountry }"
         />
@@ -201,14 +178,15 @@ const handleCloseSuccess = () => {
         >
       </div>
       <div class="field col-12 lg:col-6">
-        <label id="ConsigneeProvince">Consignee Province</label>
+        <label for="ConsigneeProvince">Consignee Province</label>
         <Dropdown
           id="ConsigneeProvince"
           v-model="formData.consigneeProvince"
           :options="provinces"
+          @change="() => onFieldChange('consigneeProvince')"
           optionLabel="name"
           optionValue="code"
-          placeholder="Select a Consignee Province"
+          placeholder="Select"
           aria-describedby="consignee-province-help"
           :class="{ 'w-full': true, 'p-invalid': !isValid.consigneeProvince }"
         />
@@ -220,14 +198,15 @@ const handleCloseSuccess = () => {
         >
       </div>
       <div class="field col-12 lg:col-6">
-        <label id="ConsigneeCity">Consignee City</label>
+        <label for="ConsigneeCity">Consignee City</label>
         <Dropdown
           id="ConsigneeCity"
           v-model="formData.consigneeCity"
           :options="cities"
+          @change="() => onFieldChange('consigneeCity')"
           optionLabel="name"
           optionValue="code"
-          placeholder="Select a Consignee City"
+          placeholder="Select"
           aria-describedby="consignee-city-help"
           :class="{ 'w-full': true, 'p-invalid': !isValid.consigneeCity }"
         />
@@ -239,14 +218,12 @@ const handleCloseSuccess = () => {
         >
       </div>
       <div class="field col-12 lg:col-6">
-        <label id="ConsigneePostalCode">Consignee Postal Code</label>
-        <InputNumber
-          inputId="ConsigneePostalCode"
-          v-model="formData.consigneePostalCode"
-          mode="decimal"
-          :useGrouping="false"
-          :input-props="{ onblur: () => onFieldBlur('consigneePostalCode') }"
-          placeholder="Consignee Postal Code"
+        <label for="ConsigneePostalCode">Consignee Postal Code</label>
+        <InputText
+          id="ConsigneePostalCode"
+          type="number"
+          v-model.number="formData.consigneePostalCode"
+          @input="() => onFieldChange('consigneePostalCode')"
           aria-describedby="consignee-postalcode-help"
           :class="{ 'w-full': true, 'p-invalid': !isValid.consigneePostalCode }"
         />
@@ -258,14 +235,12 @@ const handleCloseSuccess = () => {
         >
       </div>
       <div class="field col-12 lg:col-6">
-        <label id="ConsigneeNumber">Consignee Number</label>
-        <InputNumber
-          inputId="ConsigneeNumber"
-          v-model="formData.consigneeNumber"
-          mode="decimal"
-          :useGrouping="false"
-          :input-props="{ onblur: () => onFieldBlur('consigneeNumber') }"
-          placeholder="Consignee Number"
+        <label for="ConsigneeNumber">Consignee Number</label>
+        <InputText
+          id="ConsigneeNumber"
+          type="number"
+          v-model.number="formData.consigneeNumber"
+          @input="() => onFieldChange('consigneeNumber')"
           aria-describedby="consignee-number-help"
           :class="{ 'w-full': true, 'p-invalid': !isValid.consigneeNumber }"
         />
@@ -277,14 +252,12 @@ const handleCloseSuccess = () => {
         >
       </div>
       <div class="field col-12 lg:col-6">
-        <label id="height">Height</label>
-        <InputNumber
-          inputId="height"
-          v-model="formData.height"
-          mode="decimal"
-          :useGrouping="false"
-          :input-props="{ onblur: () => onFieldBlur('height') }"
-          placeholder="Height"
+        <label for="height">Height</label>
+        <InputText
+          id="height"
+          type="number"
+          v-model.number="formData.height"
+          @input="() => onFieldChange('height')"
           aria-describedby="height-help"
           :class="{ 'w-full': true, 'p-invalid': !isValid.height }"
         />
@@ -293,14 +266,12 @@ const handleCloseSuccess = () => {
         >
       </div>
       <div class="field col-12 lg:col-6">
-        <label id="weight">Weight</label>
-        <InputNumber
-          inputId="weight"
-          v-model="formData.weight"
-          mode="decimal"
-          :useGrouping="false"
-          :input-props="{ onblur: () => onFieldBlur('weight') }"
-          placeholder="Weight"
+        <label for="weight">Weight</label>
+        <InputText
+          id="weight"
+          type="number"
+          v-model.number="formData.weight"
+          @input="() => onFieldChange('weight')"
           aria-describedby="weight-help"
           :class="{ 'w-full': true, 'p-invalid': !isValid.weight }"
         />
@@ -310,13 +281,11 @@ const handleCloseSuccess = () => {
       </div>
       <div class="field col-12 lg:col-6">
         <label id="length">Length</label>
-        <InputNumber
-          inputId="length"
-          v-model="formData.length"
-          mode="decimal"
-          :useGrouping="false"
-          :input-props="{ onblur: () => onFieldBlur('length') }"
-          placeholder="Length"
+        <InputText
+          id="length"
+          type="number"
+          v-model.number="formData.length"
+          @input="() => onFieldChange('length')"
           aria-describedby="length-help"
           :class="{ 'w-full': true, 'p-invalid': !isValid.length }"
         />
@@ -326,13 +295,11 @@ const handleCloseSuccess = () => {
       </div>
       <div class="field col-12 lg:col-6">
         <label id="width">Width</label>
-        <InputNumber
-          inputId="width"
-          v-model="formData.width"
-          mode="decimal"
-          :useGrouping="false"
-          :input-props="{ onblur: () => onFieldBlur('width') }"
-          placeholder="Width"
+        <InputText
+          id="width"
+          type="number"
+          v-model.number="formData.width"
+          @input="() => onFieldChange('width')"
           aria-describedby="width-help"
           :class="{ 'w-full': true, 'p-invalid': !isValid.width }"
         />
@@ -341,14 +308,15 @@ const handleCloseSuccess = () => {
         >
       </div>
       <div class="field col-12 lg:col-6">
-        <label id="PaymentType">Payment Type</label>
+        <label for="PaymentType">Payment Type</label>
         <Dropdown
           id="PaymentType"
           v-model="formData.paymentType"
           :options="paymentTypes"
+          @change="() => onFieldChange('paymentType')"
           optionLabel="name"
           optionValue="code"
-          placeholder="Select a Payment Type"
+          placeholder="Select"
           aria-describedby="payment-type-help"
           :class="{ 'w-full': true, 'p-invalid': !isValid.paymentType }"
         />
