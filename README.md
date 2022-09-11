@@ -23,3 +23,5 @@ This project was built using the tools mentioned below:
 3. Vite (project boilerplate)
 
 4. PrimeVUE, PrimeFlex, and PrimeIcons (UI components, utility css and icons)
+
+5. Axios (Http request)
