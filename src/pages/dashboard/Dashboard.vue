@@ -8,7 +8,6 @@ import appServices from "../../appServices";
 import { AUTH_SESSION, PATH } from "../../constant";
 
 const router = useRouter();
-
 const orders = ref([]);
 const isLoading = ref(true);
 
@@ -33,7 +32,7 @@ const handleAddOrderClick = () => {
 </script>
 
 <template>
-  <div class="dashboard-container flex flex-column 1bg-orange-500">
+  <div class="dashboard-container flex flex-column">
     <h2 class="text-3xl text-blue-500">Dashboard</h2>
     <Button
       label="Add Order"
@@ -65,7 +64,7 @@ const handleAddOrderClick = () => {
 
 <style scoped>
 .dashboard-container {
-  max-width: 768px;
+  max-width: var(--max-screen-width);
   margin: auto;
   min-height: calc(100vh - 100px);
 }

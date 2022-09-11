@@ -1,7 +1,7 @@
 <script setup>
 import { watch, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import Menubar from "primevue/menubar";
+import MenuHeader from "./components/Header.vue";
 import { AUTH_SESSION, PATH } from "./constant";
 
 const router = useRouter();
@@ -23,32 +23,21 @@ const handleLogOut = () => {
 </script>
 
 <template>
-  <Menubar v-if="isAuthenticated">
-    <template #end>
-      <div>
-        <i
-          class="pi pi-fw pi-power-off cursor-pointer"
-          @click="handleLogOut"
-        ></i>
-      </div>
-    </template>
-  </Menubar>
+  <MenuHeader :is-authenticated="isAuthenticated" @logout="handleLogOut" />
   <div class="app-container">
     <router-view></router-view>
   </div>
 </template>
 
 <style>
+:root {
+  --max-screen-width: 768px;
+}
 body {
   margin: 0;
 }
-.p-menubar {
-  height: 42px;
-}
-.p-menubar-button {
-  display: none !important;
-}
 .app-container {
+  min-width: 280px;
   padding: 0 10px 40px;
 }
 input[type="number"]::-webkit-inner-spin-button,

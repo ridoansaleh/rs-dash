@@ -115,7 +115,7 @@ const handleFormSubmit = () => {
       :style="{ width: '50vw' }"
     >
       <p>
-        There is an error from the server. Please re-try later!
+        The server has returned an error. Please re-try later!
       </p>
     </Dialog>
   </div>

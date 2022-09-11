@@ -5,3 +5,9 @@ export const PATH = {
   DASHBOARD: "/dashboard",
   NEW_ORDER: "/new-order",
 };
+
+export const ENDPOINT = {
+  BASE_URL: 'https://fe-screening.onrender.com',
+  LOGIN: '/login',
+  ORDERS: '/orders'
+}

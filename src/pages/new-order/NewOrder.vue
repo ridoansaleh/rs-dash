@@ -36,26 +36,17 @@ const isValid = reactive({
   paymentType: true,
 });
 const isLoading = ref(false);
-const isSubmitting = ref(false);
 const isServerError = ref(false);
 const isSuccess = ref(false);
 const countries = ref(countryList);
 
 const provinces = computed(() => {
-  let list = [];
-  if (!formData.consigneeCountry) {
-    list = provinceList.SG;
-  }
-  list = provinceList[formData.consigneeCountry];
+  let list = provinceList[formData.consigneeCountry];
   return toKeyValue(list);
 });
 
 const cities = computed(() => {
-  let list = [];
-  if (!formData.consigneeProvince) {
-    list = cityList.Singapore;
-  }
-  list = cityList[formData.consigneeProvince];
+  let list = cityList[formData.consigneeProvince];
   return toKeyValue(list);
 });
 const paymentTypes = ref(toKeyValue(paymentTypeList));
@@ -69,6 +60,11 @@ const menuItems = [
   { label: "Dashboard", to: PATH.DASHBOARD },
   { label: "New Order", to: PATH.NEW_ORDER },
 ];
+
+watch(() => formData.consigneeCountry, () => {
+  formData.consigneeProvince = ""
+  formData.consigneeCity = ""
+})
 
 const validateValue = (value) => {
   if (typeof value === "number") return value > 0;
@@ -84,12 +80,18 @@ const handleFormSubmit = () => {
     isValid[field] = validateValue(formData[field]);
   }
   const validStatuses = Object.values(isValid);
-  if (validStatuses.some((valid) => valid === false)) return;
+  if (validStatuses.some((valid) => valid === false)) {
+    setTimeout(() => {
+      document.querySelector('.p-invalid').scrollIntoView({
+        behavior: 'smooth'
+      });
+    }, 500)
+    return
+  }
   isLoading.value = true;
-  isSubmitting.value = true;
   const session = sessionStorage.getItem(AUTH_SESSION);
   appServices
-    .createrOrder(
+    .createOrder(
       {
         ...formData,
         consigneePostalCode: String(formData.consigneePostalCode),
@@ -112,19 +114,14 @@ const handleFormSubmit = () => {
       isLoading.value = false;
     });
 };
-
-const handleCloseSuccess = () => {
-  isSuccess.value = false;
-  isSubmitting.value = false;
-};
 </script>
 
 <template>
-  <div class="neworder-container flex flex-column 1bg-orange-500">
-    <h2 class="text-3xl text-blue-500">New Order Page</h2>
+  <div class="neworder-container flex flex-column">
+    <h2 class="text-3xl text-blue-500">New Order</h2>
     <Breadcrumb class="mb-6" :home="dashboard" :model="menuItems" />
     <form @submit.prevent="handleFormSubmit" class="grid" novalidate>
-      <div class="field col-12 lg:col-6">
+      <div class="field col-12 md:col-6">
         <label for="ConsigneeName">Consignee Name</label>
         <InputText
           id="ConsigneeName"
@@ -140,7 +137,7 @@ const handleCloseSuccess = () => {
           >Consignee Name is required</small
         >
       </div>
-      <div class="field col-12 lg:col-6">
+      <div class="field col-12 md:col-6">
         <label for="ConsigneeAddress">Consignee Address</label>
         <InputText
           id="ConsigneeAddress"
@@ -156,7 +153,7 @@ const handleCloseSuccess = () => {
           >Consignee Address is required</small
         >
       </div>
-      <div class="field col-12 lg:col-6">
+      <div class="field col-12 md:col-6">
         <label for="ConsigneeCountry">Consignee Country</label>
         <Dropdown
           id="ConsigneeCountry"
@@ -176,7 +173,7 @@ const handleCloseSuccess = () => {
           >Consignee Country is required</small
         >
       </div>
-      <div class="field col-12 lg:col-6">
+      <div class="field col-12 md:col-6">
         <label for="ConsigneeProvince">Consignee Province</label>
         <Dropdown
           id="ConsigneeProvince"
@@ -196,7 +193,7 @@ const handleCloseSuccess = () => {
           >Consignee Province is required</small
         >
       </div>
-      <div class="field col-12 lg:col-6">
+      <div class="field col-12 md:col-6">
         <label for="ConsigneeCity">Consignee City</label>
         <Dropdown
           id="ConsigneeCity"
@@ -216,7 +213,7 @@ const handleCloseSuccess = () => {
           >Consignee City is required</small
         >
       </div>
-      <div class="field col-12 lg:col-6">
+      <div class="field col-12 md:col-6">
         <label for="ConsigneePostalCode">Consignee Postal Code</label>
         <InputText
           id="ConsigneePostalCode"
@@ -233,7 +230,7 @@ const handleCloseSuccess = () => {
           >Consignee Postal Code is required</small
         >
       </div>
-      <div class="field col-12 lg:col-6">
+      <div class="field col-12 md:col-6">
         <label for="ConsigneeNumber">Consignee Number</label>
         <InputText
           id="ConsigneeNumber"
@@ -250,7 +247,7 @@ const handleCloseSuccess = () => {
           >Consignee Number is required</small
         >
       </div>
-      <div class="field col-12 lg:col-6">
+      <div class="field col-12 md:col-6">
         <label for="height">Height</label>
         <InputText
           id="height"
@@ -264,7 +261,7 @@ const handleCloseSuccess = () => {
           >Height is required</small
         >
       </div>
-      <div class="field col-12 lg:col-6">
+      <div class="field col-12 md:col-6">
         <label for="weight">Weight</label>
         <InputText
           id="weight"
@@ -278,7 +275,7 @@ const handleCloseSuccess = () => {
           >Weight is required</small
         >
       </div>
-      <div class="field col-12 lg:col-6">
+      <div class="field col-12 md:col-6">
         <label id="length">Length</label>
         <InputText
           id="length"
@@ -292,7 +289,7 @@ const handleCloseSuccess = () => {
           >Length is required</small
         >
       </div>
-      <div class="field col-12 lg:col-6">
+      <div class="field col-12 md:col-6">
         <label id="width">Width</label>
         <InputText
           id="width"
@@ -306,7 +303,7 @@ const handleCloseSuccess = () => {
           >Width is required</small
         >
       </div>
-      <div class="field col-12 lg:col-6">
+      <div class="field col-12 md:col-6">
         <label for="PaymentType">Payment Type</label>
         <Dropdown
           id="PaymentType"
@@ -326,11 +323,11 @@ const handleCloseSuccess = () => {
           >Payment Type is required</small
         >
       </div>
-      <div class="col-12 lg:flex lg:flex lg:justify-content-end">
+      <div class="col-12 md:flex md:justify-content-end">
         <Button
           type="submit"
           :loading="isLoading"
-          class="col-12 lg:col-4"
+          class="col-12 md:col-4"
           label="Save"
         />
       </div>
@@ -350,7 +347,7 @@ const handleCloseSuccess = () => {
           <Button
             label="Yes, create another"
             icon="pi pi-times"
-            @click="handleCloseSuccess"
+            @click="isSuccess = false"
             class="p-button-text"
           />
           <Button
@@ -369,14 +366,14 @@ const handleCloseSuccess = () => {
       :breakpoints="{ '960px': '75vw', '640px': '90vw' }"
       :style="{ width: '50vw' }"
     >
-      <p>There is an error from the server. Please re-try later!</p>
+      <p>The server has returned an error. Please re-try later!</p>
     </Dialog>
   </div>
 </template>
 
 <style scoped>
 .neworder-container {
-  max-width: 768px;
+  max-width: var(--max-screen-width);
   margin: auto;
   min-height: calc(100vh - 100px);
 }

@@ -1,26 +1,27 @@
 import axios from "axios";
+import { ENDPOINT } from './constant'
 
 const instance = axios.create({
-  baseURL: "https://fe-screening.onrender.com"
+  baseURL: ENDPOINT.BASE_URL
 });
 
 const appServices = {
   login: ({ username, password }) => {
-    return instance.post("/login", {
+    return instance.post(ENDPOINT.LOGIN, {
       username,
       password,
     });
   },
   getOrders: (session) => {
-    return instance.get("/orders", {
+    return instance.get(ENDPOINT.ORDERS, {
       headers: {
         Authorization: session,
       },
     });
   },
-  createrOrder: (data, session) => {
+  createOrder: (data, session) => {
     return instance.post(
-      "/orders",
+      ENDPOINT.ORDERS,
       data,
       {
         headers: {
