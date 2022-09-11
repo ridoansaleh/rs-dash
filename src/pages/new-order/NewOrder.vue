@@ -76,7 +76,6 @@ const validateValue = (value) => {
 };
 
 const onFieldChange = (field) => {
-  console.log("Changed : ", formData[field]);
   isValid[field] = validateValue(formData[field]);
 };
 
