@@ -8,8 +8,8 @@ import Dialog from "primevue/dialog";
 import Breadcrumb from "primevue/breadcrumb";
 import appServices from "../../appServices";
 import { PATH, AUTH_SESSION } from "../../constant";
+import Order from './Order'
 import {
-  initialOrder,
   countryList,
   provinceList,
   cityList,
@@ -19,22 +19,9 @@ import {
 const toKeyValue = (arr = []) => arr.map((d) => ({ name: d, code: d }));
 
 const router = useRouter();
-
-const formData = reactive({ ...initialOrder });
-const isValid = reactive({
-  consigneeName: true,
-  consigneeAddress: true,
-  consigneeCity: true,
-  consigneeCountry: true,
-  consigneePostalCode: true,
-  consigneeProvince: true,
-  consigneeNumber: true,
-  height: true,
-  weight: true,
-  length: true,
-  width: true,
-  paymentType: true,
-});
+const order = new Order()
+const formData = reactive(order.initialValues);
+const isValid = reactive(order.initialValidation);
 const isLoading = ref(false);
 const isServerError = ref(false);
 const isSuccess = ref(false);
@@ -61,9 +48,20 @@ const menuItems = [
   { label: "New Order", to: PATH.NEW_ORDER },
 ];
 
-watch(() => formData.consigneeCountry, () => {
-  formData.consigneeProvince = ""
+watch(() => formData.consigneeCountry, (newVal, prevVal) => {
+  formData.consigneeProvince = provinces.value.length === 1 ? provinces.value[0].name : ""
   formData.consigneeCity = ""
+  if (prevVal && newVal !== "") {
+    isValid.consigneeProvince = validateValue(formData.consigneeProvince)
+    isValid.consigneeCity = validateValue(formData.consigneeCity)
+  }
+})
+
+watch(() => formData.consigneeProvince, (newVal) => {
+  formData.consigneeCity = cities.value.length === 1 ? cities.value[0].name : ""
+  if (newVal !== "") {
+    isValid.consigneeCity = validateValue(formData.consigneeCity)
+  }
 })
 
 const validateValue = (value) => {
@@ -75,19 +73,20 @@ const onFieldChange = (field) => {
   isValid[field] = validateValue(formData[field]);
 };
 
+const scrollUpOnError = () => {
+  setTimeout(() => {
+    document.querySelector('.p-invalid').scrollIntoView({
+      behavior: 'smooth'
+    });
+  }, 500)
+}
+
 const handleFormSubmit = () => {
   for (const field in formData) {
     isValid[field] = validateValue(formData[field]);
   }
   const validStatuses = Object.values(isValid);
-  if (validStatuses.some((valid) => valid === false)) {
-    setTimeout(() => {
-      document.querySelector('.p-invalid').scrollIntoView({
-        behavior: 'smooth'
-      });
-    }, 500)
-    return
-  }
+  if (validStatuses.some((valid) => valid === false)) return scrollUpOnError()
   isLoading.value = true;
   const session = sessionStorage.getItem(AUTH_SESSION);
   appServices
@@ -108,7 +107,7 @@ const handleFormSubmit = () => {
     .finally(() => {
       if (!isServerError.value) {
         for (const field in formData) {
-          formData[field] = initialOrder[field];
+          formData[field] = order.initialValues[field];
         }
       }
       isLoading.value = false;
@@ -120,7 +119,7 @@ const handleFormSubmit = () => {
   <div class="neworder-container flex flex-column">
     <h2 class="text-3xl text-blue-500">New Order</h2>
     <Breadcrumb class="mb-6" :home="dashboard" :model="menuItems" />
-    <form @submit.prevent="handleFormSubmit" class="grid" novalidate>
+    <form @submit.prevent="handleFormSubmit" class="grid" autocomplete="off" novalidate>
       <div class="field col-12 md:col-6">
         <label for="ConsigneeName">Consignee Name</label>
         <InputText

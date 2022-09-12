@@ -1,18 +1,3 @@
-export const initialOrder = {
-  consigneeName: "",
-  consigneeAddress: "",
-  consigneeCity: "",
-  consigneeCountry: "",
-  consigneePostalCode: null,
-  consigneeProvince: "",
-  consigneeNumber: null,
-  height: null,
-  weight: null,
-  length: null,
-  width: null,
-  paymentType: "",
-};
-
 export const countryList = [
   {
     name: "Singapore",
