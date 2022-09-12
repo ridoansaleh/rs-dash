@@ -20,7 +20,7 @@ const toKeyValue = (arr = []) => arr.map((d) => ({ name: d, code: d }));
 
 const router = useRouter();
 const order = new Order()
-const formData = reactive(order.initialValues);
+const formData = reactive({ ...order.initialValues });
 const isValid = reactive(order.initialValidation);
 const isLoading = ref(false);
 const isServerError = ref(false);
@@ -48,10 +48,10 @@ const menuItems = [
   { label: "New Order", to: PATH.NEW_ORDER },
 ];
 
-watch(() => formData.consigneeCountry, (newVal, prevVal) => {
+watch(() => formData.consigneeCountry, (newVal) => {
   formData.consigneeProvince = provinces.value.length === 1 ? provinces.value[0].name : ""
   formData.consigneeCity = ""
-  if (prevVal && newVal !== "") {
+  if (newVal !== "") {
     isValid.consigneeProvince = validateValue(formData.consigneeProvince)
     isValid.consigneeCity = validateValue(formData.consigneeCity)
   }

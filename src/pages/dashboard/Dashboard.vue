@@ -40,7 +40,7 @@ const handleAddOrderClick = () => {
       class="p-button-secondary w-max my-4"
     />
     <DataTable :value="orders" responsiveLayout="scroll" :paginator="orders.length > 5" :rows="5">
-      <Column field="ConsigneeName" header="Code"></Column>
+      <Column field="ConsigneeName" header="Consignee Name"></Column>
       <Column field="ConsigneeAddress" header="Consignee Address"></Column>
       <Column field="ConsigneeCity" header="Consignee City"></Column>
       <Column field="ConsigneeCountry" header="Consignee Country"></Column>
