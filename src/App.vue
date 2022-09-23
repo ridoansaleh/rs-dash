@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { watch, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import MenuHeader from "./components/Header.vue";

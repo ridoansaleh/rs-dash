@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { ref, reactive, computed, watch } from "vue";
 import { useRouter } from "vue-router";
 import InputText from "primevue/inputtext";
@@ -8,32 +8,35 @@ import Dialog from "primevue/dialog";
 import Breadcrumb from "primevue/breadcrumb";
 import appServices from "../../appServices";
 import { PATH, AUTH_SESSION } from "../../constant";
-import Order from './Order'
+import Order from '../../entities/Order'
 import {
   countryList,
   provinceList,
   cityList,
   paymentTypeList,
 } from "./data";
+import type { OrderKeys, ISelectOption, provinceNames } from '../../types'
 
-const toKeyValue = (arr = []) => arr.map((d) => ({ name: d, code: d }));
+const toKeyValue = (arr: string[] = []): ISelectOption[] => {
+  return arr.map((d) => ({ name: d, code: d }))
+};
 
 const router = useRouter();
 const order = new Order()
 const formData = reactive({ ...order.initialValues });
-const isValid = reactive(order.initialValidation);
+const isValid = reactive(order.validationStatus);
 const isLoading = ref(false);
 const isServerError = ref(false);
 const isSuccess = ref(false);
 const countries = ref(countryList);
 
 const provinces = computed(() => {
-  let list = provinceList[formData.consigneeCountry];
-  return toKeyValue(list);
+  let list = formData.consigneeCountry ? provinceList[formData.consigneeCountry] : [];
+  return list.map((d) => ({ name: d, code: d }))
 });
 
 const cities = computed(() => {
-  let list = cityList[formData.consigneeProvince];
+  let list = formData.consigneeProvince ? cityList[formData.consigneeProvince] : [];
   return toKeyValue(list);
 });
 const paymentTypes = ref(toKeyValue(paymentTypeList));
@@ -49,9 +52,11 @@ const menuItems = [
 ];
 
 watch(() => formData.consigneeCountry, (newVal) => {
-  formData.consigneeProvince = provinces.value.length === 1 ? provinces.value[0].name : ""
+  if (provinces.value.length === 1) {
+    formData.consigneeProvince = provinces.value[0].name as provinceNames
+  }
   formData.consigneeCity = ""
-  if (newVal !== "") {
+  if (newVal) {
     isValid.consigneeProvince = validateValue(formData.consigneeProvince)
     isValid.consigneeCity = validateValue(formData.consigneeCity)
   }
@@ -59,23 +64,23 @@ watch(() => formData.consigneeCountry, (newVal) => {
 
 watch(() => formData.consigneeProvince, (newVal) => {
   formData.consigneeCity = cities.value.length === 1 ? cities.value[0].name : ""
-  if (newVal !== "") {
+  if (newVal) {
     isValid.consigneeCity = validateValue(formData.consigneeCity)
   }
 })
 
-const validateValue = (value) => {
+const validateValue = (value: any) => {
   if (typeof value === "number") return value > 0;
   return ![null, ""].includes(value);
 };
 
-const onFieldChange = (field) => {
+const onFieldChange = (field: OrderKeys) => {
   isValid[field] = validateValue(formData[field]);
 };
 
 const scrollUpOnError = () => {
   setTimeout(() => {
-    document.querySelector('.p-invalid').scrollIntoView({
+    document.querySelector('.p-invalid')?.scrollIntoView({
       behavior: 'smooth'
     });
   }, 500)
@@ -83,12 +88,12 @@ const scrollUpOnError = () => {
 
 const handleFormSubmit = () => {
   for (const field in formData) {
-    isValid[field] = validateValue(formData[field]);
+    isValid[field as OrderKeys] = validateValue(formData[field as OrderKeys]);
   }
   const validStatuses = Object.values(isValid);
   if (validStatuses.some((valid) => valid === false)) return scrollUpOnError()
   isLoading.value = true;
-  const session = sessionStorage.getItem(AUTH_SESSION);
+  const session = sessionStorage.getItem(AUTH_SESSION) || '';
   appServices
     .createOrder(
       {
@@ -106,9 +111,7 @@ const handleFormSubmit = () => {
     })
     .finally(() => {
       if (!isServerError.value) {
-        for (const field in formData) {
-          formData[field] = order.initialValues[field];
-        }
+        Object.assign(formData, order.initialValues)
       }
       isLoading.value = false;
     });

@@ -1,5 +1,4 @@
-<script setup>
-import { defineProps, defineEmits } from "vue";
+<script setup lang="ts">
 import Menubar from "primevue/menubar";
 
 defineProps({

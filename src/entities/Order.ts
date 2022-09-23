@@ -1,12 +1,16 @@
+import type { IOrder, IOrderValidStatus, OrderKeys } from '../types'
+
 export default class Order {
+  state: IOrder
+
   constructor() {
     this.state = {
       consigneeName: "",
       consigneeAddress: "",
       consigneeCity: "",
-      consigneeCountry: "",
+      consigneeCountry: null,
       consigneePostalCode: null,
-      consigneeProvince: "",
+      consigneeProvince: null,
       consigneeNumber: null,
       height: null,
       weight: null,
@@ -16,14 +20,14 @@ export default class Order {
     };
   }
 
-  get initialValues() {
+  get initialValues(): IOrder {
     return this.state;
   }
 
-  get initialValidation() {
-    let result = {};
+  get validationStatus() {
+    let result: Partial<IOrderValidStatus> = {};
     for (const field in this.state) {
-      result[field] = true;
+      result[field as OrderKeys] = true;
     }
     return result;
   }

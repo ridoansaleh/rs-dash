@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { ref, reactive } from "vue";
 import { useRouter } from "vue-router";
 import InputText from "primevue/inputtext";
@@ -6,6 +6,7 @@ import Button from "primevue/button";
 import Dialog from 'primevue/dialog';
 import appServices from "../../appServices";
 import { PATH, AUTH_SESSION } from "../../constant";
+import type { CredentialKeys } from '../../types'
 
 const router = useRouter();
 
@@ -21,7 +22,7 @@ const showPassword = ref(false);
 const isLoading = ref(false);
 const isServerError = ref(false)
 
-const onFieldChange = (field) => {
+const onFieldChange = (field: CredentialKeys) => {
   isValid[field] = formData[field] !== ""
 }
 

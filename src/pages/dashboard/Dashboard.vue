@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import DataTable from "primevue/datatable";
@@ -12,7 +12,7 @@ const orders = ref([]);
 const isLoading = ref(true);
 
 onMounted(() => {
-  const session = sessionStorage.getItem(AUTH_SESSION);
+  const session = sessionStorage.getItem(AUTH_SESSION) || '';
   appServices
     .getOrders(session)
     .then((res) => {
